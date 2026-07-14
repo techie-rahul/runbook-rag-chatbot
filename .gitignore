@@ -216,3 +216,35 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# =========================
+# React / Node.js
+# =========================
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.vite/
+
+# npm logs
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# ChromaDB
+chroma/
+chroma_db/
+
+# Uploads (if used)
+uploads/
+
+# Temporary files
+*.tmp
