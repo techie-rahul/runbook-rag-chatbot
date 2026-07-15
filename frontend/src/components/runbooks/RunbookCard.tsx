@@ -1,6 +1,6 @@
 import { Clock, BookOpen } from "lucide-react";
 import Tag from "@/components/runbooks/Tag";
-import { CATEGORY_COLORS } from "@/components/runbooks/CategoryFilter";
+import { CATEGORY_COLORS } from "@/constants/runbooks";
 import type { RunbookData, RunbookSeverity } from "@/types";
 
 const SEVERITY_STYLE: Record<RunbookSeverity, string> = {
