@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -10,6 +10,7 @@ import {
   MarkerType,
   type NodeTypes,
   type Node,
+  type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -18,9 +19,26 @@ import GraphToolbar from "@/components/knowledge-graph/GraphToolbar";
 import GraphLegend from "@/components/knowledge-graph/GraphLegend";
 import NodeDetailPanel from "@/components/knowledge-graph/NodeDetailPanel";
 import { initialNodes, initialEdges, findRootCausePath } from "@/data/mockGraphData";
-import type { GraphNodeData, NodeStatus } from "@/types";
+import type { GraphNodeData, NodeStatus, ServiceType } from "@/types";
+
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 const nodeTypes: NodeTypes = { custom: CustomNode };
+
+/** Map category string to a service type for coloring */
+function categoryToServiceType(category: string): ServiceType {
+  const map: Record<string, ServiceType> = {
+    Networking: "gateway",
+    Kubernetes: "service",
+    Database: "database",
+    Monitoring: "monitoring",
+    Docker: "service",
+    Security: "service",
+    Linux: "service",
+    General: "service",
+  };
+  return map[category] ?? "service";
+}
 
 /** Type-safe accessor for node data */
 function getData(node: Node): GraphNodeData {
@@ -28,11 +46,75 @@ function getData(node: Node): GraphNodeData {
 }
 
 function GraphCanvas() {
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [highlightedPath, setHighlightedPath] = useState<{ nodeIds: string[]; edgeIds: string[] }>({ nodeIds: [], edgeIds: [] });
   const [traceMessage, setTraceMessage] = useState<string | null>(null);
+
+  // ── Fetch graph from backend ───────────────────
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchGraph() {
+      try {
+        const res = await fetch(`${API_BASE}/graph`);
+        if (!res.ok) throw new Error(`${res.status}`);
+        const data: {
+          nodes: Array<{ id: string; title: string; category: string }>;
+          edges: Array<{ source: string; target: string }>;
+        } = await res.json();
+
+        if (cancelled) return;
+
+        // Lay nodes out in a circle
+        const count = data.nodes.length;
+        const radius = Math.max(250, count * 40);
+        const cx = 400, cy = 350;
+
+        const mappedNodes: Node<GraphNodeData>[] = data.nodes.map((n, i) => {
+          const angle = (2 * Math.PI * i) / count - Math.PI / 2;
+          return {
+            id: n.id,
+            type: "custom",
+            position: {
+              x: cx + radius * Math.cos(angle),
+              y: cy + radius * Math.sin(angle),
+            },
+            data: {
+              label: n.title,
+              serviceType: categoryToServiceType(n.category),
+              status: "healthy" as NodeStatus,
+              description: `${n.category} runbook`,
+              relatedRunbooks: [],
+            },
+          };
+        });
+
+        const mappedEdges: Edge[] = data.edges.map((e, i) => ({
+          id: `e-${i}`,
+          source: e.source,
+          target: e.target,
+          animated: true,
+          style: { stroke: "#3f3f46", strokeWidth: 1.5 },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#3f3f46",
+            width: 16,
+            height: 16,
+          },
+        }));
+
+        setNodes(mappedNodes);
+        setEdges(mappedEdges);
+      } catch {
+        // Keep mock data — already set as initial state
+      }
+    }
+
+    fetchGraph();
+    return () => { cancelled = true; };
+  }, [setNodes, setEdges]);
 
   const isTracing = highlightedPath.nodeIds.length > 0;
 

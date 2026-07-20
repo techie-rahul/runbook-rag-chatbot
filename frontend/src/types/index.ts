@@ -32,6 +32,14 @@ export interface ChatMessage {
   timestamp: Date;
   sources?: RetrievedSource[];
   analysis?: IncidentAnalysis;
+  /** Chunks retrieved from the backend RAG pipeline */
+  sourceChunks?: string[];
+  /** Runbook titles expanded via graph neighbors */
+  expandedViaGraph?: string[];
+  /** Whether the LLM was confident in its answer */
+  confident?: boolean;
+  /** True when the fetch itself failed */
+  isError?: boolean;
 }
 
 export interface RetrievedSource {
