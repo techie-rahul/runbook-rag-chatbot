@@ -3,8 +3,9 @@ import WelcomeCard from "@/components/chat/WelcomeCard";
 import ChatMessage from "@/components/chat/ChatMessage";
 import ChatInput from "@/components/chat/ChatInput";
 import TypingIndicator from "@/components/chat/TypingIndicator";
-import { getMockResponse } from "@/data/mockChatResponses";
 import type { ChatMessage as ChatMessageType } from "@/types";
+
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 export default function Chat() {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
@@ -24,7 +25,7 @@ export default function Chat() {
   }, [messages, isLoading, scrollToBottom]);
 
   // ── Send message handler ──────────────────────
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
 
@@ -39,12 +40,46 @@ export default function Chat() {
     setInput("");
     setIsLoading(true);
 
-    // Simulate backend delay
-    setTimeout(() => {
-      const assistantMessage = getMockResponse(trimmed);
+    try {
+      const res = await fetch(`${API_BASE}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: trimmed }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server error: ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      const assistantMessage: ChatMessageType = {
+        id: `asst-${Date.now()}`,
+        role: "assistant",
+        content: data.answer,
+        timestamp: new Date(),
+        confident: data.confident,
+        sourceChunks: data.source_chunks,
+        expandedViaGraph: data.expanded_via_graph,
+      };
+
       setMessages((prev) => [...prev, assistantMessage]);
+    } catch (err) {
+      const errorMessage: ChatMessageType = {
+        id: `err-${Date.now()}`,
+        role: "assistant",
+        content:
+          err instanceof Error
+            ? `Failed to reach the backend: ${err.message}`
+            : "An unexpected error occurred. Is the backend running on port 8000?",
+        timestamp: new Date(),
+        isError: true,
+      };
+
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   }, [input, isLoading]);
 
   // ── Select suggested prompt ───────────────────

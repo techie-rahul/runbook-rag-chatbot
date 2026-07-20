@@ -1,11 +1,13 @@
-import { useState, useMemo } from "react";
-import { ArrowUpDown } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { ArrowUpDown, Loader2 } from "lucide-react";
 import RunbookSearch from "@/components/runbooks/RunbookSearch";
 import CategoryFilter from "@/components/runbooks/CategoryFilter";
 import RunbookCard from "@/components/runbooks/RunbookCard";
 import RunbookDetail from "@/components/runbooks/RunbookDetail";
 import { mockRunbooks } from "@/data/mockRunbooks";
 import type { RunbookCategory, RunbookData } from "@/types";
+
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 type SortKey = "title" | "updated" | "severity";
 
@@ -16,12 +18,60 @@ export default function Runbooks() {
   const [category, setCategory] = useState<RunbookCategory | null>(null);
   const [sortBy, setSortBy] = useState<SortKey>("updated");
   const [selectedRunbook, setSelectedRunbook] = useState<RunbookData | null>(null);
+  const [runbooks, setRunbooks] = useState<RunbookData[]>(mockRunbooks);
+  const [loading, setLoading] = useState(true);
+
+  // ── Fetch runbooks from backend ────────────────
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchRunbooks() {
+      try {
+        const res = await fetch(`${API_BASE}/runbooks`);
+        if (!res.ok) throw new Error(`${res.status}`);
+        const data: Array<{
+          slug: string;
+          title: string;
+          category: string;
+          severity: string;
+          tags: string[];
+        }> = await res.json();
+
+        if (!cancelled) {
+          const mapped: RunbookData[] = data.map((rb) => ({
+            id: rb.slug,
+            title: rb.title,
+            category: (rb.category || "General") as RunbookCategory,
+            severity: (rb.severity || "Medium") as RunbookData["severity"],
+            description: `Operational runbook: ${rb.title}`,
+            tags: rb.tags ?? [],
+            lastUpdated: "—",
+            readingTime: 3,
+            symptoms: [],
+            possibleCauses: [],
+            resolutionSteps: [],
+            verificationSteps: [],
+            relatedRunbooks: [],
+            references: [],
+          }));
+          setRunbooks(mapped);
+        }
+      } catch {
+        // Keep mock data as fallback — already set as default
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchRunbooks();
+    return () => { cancelled = true; };
+  }, []);
 
   // ── Filter & sort ─────────────────────────────
   const filteredRunbooks = useMemo(() => {
     const query = search.toLowerCase();
 
-    let results = mockRunbooks.filter((rb) => {
+    let results = runbooks.filter((rb) => {
       // Category filter
       if (category && rb.category !== category) return false;
 
@@ -53,7 +103,7 @@ export default function Runbooks() {
     });
 
     return results;
-  }, [search, category, sortBy]);
+  }, [search, category, sortBy, runbooks]);
 
   return (
     <>
@@ -100,7 +150,11 @@ export default function Runbooks() {
 
         {/* Runbook grid */}
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {filteredRunbooks.length > 0 ? (
+          {loading ? (
+            <div className="flex h-64 items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-zinc-500" />
+            </div>
+          ) : filteredRunbooks.length > 0 ? (
             <div className="grid grid-cols-1 gap-3 pb-4 md:grid-cols-2 xl:grid-cols-3">
               {filteredRunbooks.map((rb) => (
                 <RunbookCard

@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+networkx
+pyyaml
+pydantic
+markdown
