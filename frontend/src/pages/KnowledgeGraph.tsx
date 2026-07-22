@@ -21,7 +21,7 @@ import NodeDetailPanel from "@/components/knowledge-graph/NodeDetailPanel";
 import { initialNodes, initialEdges, findRootCausePath } from "@/data/mockGraphData";
 import type { GraphNodeData, NodeStatus, ServiceType } from "@/types";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8001";
 
 const nodeTypes: NodeTypes = { custom: CustomNode };
 

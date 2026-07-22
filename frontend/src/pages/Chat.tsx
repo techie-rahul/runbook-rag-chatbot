@@ -5,7 +5,7 @@ import ChatInput from "@/components/chat/ChatInput";
 import TypingIndicator from "@/components/chat/TypingIndicator";
 import type { ChatMessage as ChatMessageType } from "@/types";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8001";
 
 export default function Chat() {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);

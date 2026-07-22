@@ -7,7 +7,7 @@ import RunbookDetail from "@/components/runbooks/RunbookDetail";
 import { mockRunbooks } from "@/data/mockRunbooks";
 import type { RunbookCategory, RunbookData } from "@/types";
 
-const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL ?? "http://localhost:8001";
 
 type SortKey = "title" | "updated" | "severity";
 
