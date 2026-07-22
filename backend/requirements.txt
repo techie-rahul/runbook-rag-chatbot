@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+networkx
+pyyaml
+pydantic
+markdown
+nest-asyncio
+langchain
+langchain-community
+chromadb
+sentence-transformers
+openai
