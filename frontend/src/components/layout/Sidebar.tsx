@@ -1,19 +1,11 @@
 import { NavLink } from "react-router-dom";
 import { Zap, MessageSquare, Network, BookOpen } from "lucide-react";
-import StatusIndicator from "@/components/ui/StatusIndicator";
-import type { ServiceHealth } from "@/types";
 
 const NAV_ITEMS = [
   { label: "Chat", path: "/", icon: MessageSquare },
   { label: "Dependency Graph", path: "/graph", icon: Network },
   { label: "Runbooks", path: "/runbooks", icon: BookOpen },
 ] as const;
-
-const SYSTEM_STATUS: ServiceHealth[] = [
-  { label: "Backend", status: "online" },
-  { label: "Vector DB", status: "online" },
-  { label: "LLM", status: "online" },
-];
 
 export default function Sidebar() {
   return (
@@ -62,20 +54,6 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
-
-      {/* ── System Status ──────────────────────── */}
-      <div className="border-t border-edge px-5 py-4">
-        <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-700">
-          System
-        </p>
-        {SYSTEM_STATUS.map((service) => (
-          <StatusIndicator
-            key={service.label}
-            label={service.label}
-            status={service.status}
-          />
-        ))}
-      </div>
     </aside>
   );
 }

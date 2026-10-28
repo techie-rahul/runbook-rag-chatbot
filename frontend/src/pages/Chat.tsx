@@ -61,6 +61,7 @@ export default function Chat() {
         confident: data.confident,
         sourceChunks: data.source_chunks,
         expandedViaGraph: data.expanded_via_graph,
+        graphEdgesUsed: data.graph_edges_used,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -71,7 +72,7 @@ export default function Chat() {
         content:
           err instanceof Error
             ? `Failed to reach the backend: ${err.message}`
-            : "An unexpected error occurred. Is the backend running on port 8000?",
+            : "An unexpected error occurred. Is the backend running on port 8001?",
         timestamp: new Date(),
         isError: true,
       };
@@ -100,7 +101,7 @@ export default function Chat() {
       </div>
 
       {/* Message Area */}
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div id="chat-scroll-container" className="min-h-0 flex-1 overflow-y-auto">
         {!hasMessages ? (
           <WelcomeCard onSelectPrompt={handleSelectPrompt} />
         ) : (

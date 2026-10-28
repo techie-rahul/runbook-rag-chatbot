@@ -36,6 +36,8 @@ export interface ChatMessage {
   sourceChunks?: string[];
   /** Runbook titles expanded via graph neighbors */
   expandedViaGraph?: string[];
+  /** Knowledge graph edges used during one-hop expansion */
+  graphEdgesUsed?: string[];
   /** Whether the LLM was confident in its answer */
   confident?: boolean;
   /** True when the fetch itself failed */

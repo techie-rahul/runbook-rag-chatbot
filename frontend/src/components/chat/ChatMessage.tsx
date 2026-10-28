@@ -1,5 +1,8 @@
-import { User, AlertCircle, ShieldAlert } from "lucide-react";
+import { User, AlertCircle } from "lucide-react";
 import AssistantResponse from "@/components/chat/AssistantResponse";
+import MarkdownRenderer from "@/components/chat/MarkdownRenderer";
+import SourcesPanel from "@/components/chat/SourcesPanel";
+import EvidenceBadge from "@/components/chat/EvidenceBadge";
 import type { ChatMessage as ChatMessageType } from "@/types";
 
 interface ChatMessageProps {
@@ -17,9 +20,9 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   if (isUser) {
     return (
       <div className="flex justify-end">
-        <div className="flex max-w-[75%] items-start gap-3">
+        <div className="flex max-w-[85%] md:max-w-[75%] items-start gap-3">
           <div className="space-y-1">
-            <div className="rounded-xl rounded-tr-sm bg-accent px-4 py-3">
+            <div className="rounded-xl rounded-tr-sm bg-accent px-4 py-3 shadow-sm">
               <p className="text-[13px] leading-relaxed text-white">
                 {message.content}
               </p>
@@ -37,8 +40,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   // ── Error state ────────────────────────────────
   if (message.isError) {
     return (
-      <div className="flex max-w-[85%]">
-        <div className="space-y-1">
+      <div className="flex max-w-[90%] md:max-w-[85%]">
+        <div className="w-full space-y-1">
           <div className="flex items-center gap-2 pb-1">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-red-500/20">
               <AlertCircle className="h-3.5 w-3.5 text-red-400" />
@@ -46,7 +49,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             <span className="text-[11px] font-medium text-zinc-500">OpsPilot</span>
             <span className="text-[10px] text-zinc-700">{timeString}</span>
           </div>
-          <div className="rounded-xl rounded-tl-sm border border-red-500/30 bg-red-500/5 px-4 py-3">
+          <div className="rounded-xl rounded-tl-sm border border-red-500/30 bg-red-500/5 px-4 py-3.5 shadow-sm">
             <p className="text-[13px] leading-relaxed text-red-300">
               {message.content}
             </p>
@@ -56,19 +59,26 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     );
   }
 
-  // ── Low-confidence indicator ───────────────────
+  // Assistant message
+  const hasSources = (message.sourceChunks && message.sourceChunks.length > 0) ||
+                     (message.expandedViaGraph && message.expandedViaGraph.length > 0);
   const isLowConfidence = message.confident === false;
 
-  // Assistant message
   return (
-    <div className="flex max-w-[85%]">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2 pb-1">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-accent-muted">
-            <span className="text-[10px] font-bold text-accent">OP</span>
+    <div className="flex max-w-[95%] md:max-w-[90%]">
+      <div className="w-full space-y-1">
+        {/* Assistant Header & Evidence Badge */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-accent-muted border border-accent/20">
+              <span className="text-[10px] font-bold text-accent">OP</span>
+            </div>
+            <span className="text-[11px] font-semibold text-zinc-400">OpsPilot</span>
+            <span className="text-[10px] text-zinc-600">{timeString}</span>
           </div>
-          <span className="text-[11px] font-medium text-zinc-500">OpsPilot</span>
-          <span className="text-[10px] text-zinc-700">{timeString}</span>
+
+          {/* Show Evidence Grounding indicator for assistant answers */}
+          <EvidenceBadge confident={message.confident} />
         </div>
 
         {message.analysis && message.sources ? (
@@ -77,71 +87,25 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             sources={message.sources}
           />
         ) : (
-          <div className="space-y-2">
-            {/* Low-confidence warning banner */}
-            {isLowConfidence && (
-              <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2">
-                <ShieldAlert className="h-3.5 w-3.5 flex-shrink-0 text-amber-400" />
-                <span className="text-[11px] text-amber-400/80">
-                  Low confidence — the AI could not find a strong match in the runbooks.
-                </span>
-              </div>
-            )}
-
-            {/* Answer bubble */}
+          <div className="space-y-1">
+            {/* Answer bubble with Markdown rendering */}
             <div
-              className={`rounded-xl rounded-tl-sm border px-4 py-3 ${
+              className={`rounded-xl rounded-tl-sm border px-4.5 py-3.5 shadow-sm transition-colors ${
                 isLowConfidence
-                  ? "border-amber-500/20 bg-amber-500/5"
+                  ? "border-amber-500/25 bg-amber-500/5"
                   : "border-edge bg-surface"
               }`}
             >
-              <p
-                className={`whitespace-pre-wrap text-[13px] leading-relaxed ${
-                  isLowConfidence ? "text-zinc-400" : "text-zinc-300"
-                }`}
-              >
-                {message.content}
-              </p>
+              <MarkdownRenderer content={message.content} />
             </div>
 
-            {/* Source chunks badges */}
-            {message.sourceChunks && message.sourceChunks.length > 0 && (
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-                  Sources
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {message.sourceChunks.map((chunk, i) => (
-                    <span
-                      key={i}
-                      className="inline-block max-w-xs truncate rounded-md border border-edge bg-app px-2 py-1 text-[11px] text-zinc-400"
-                      title={chunk}
-                    >
-                      {chunk}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Graph-expanded runbooks */}
-            {message.expandedViaGraph && message.expandedViaGraph.length > 0 && (
-              <div className="space-y-1.5">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">
-                  Expanded via graph
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {message.expandedViaGraph.map((title, i) => (
-                    <span
-                      key={i}
-                      className="inline-block rounded-md border border-cyan-500/20 bg-cyan-500/5 px-2 py-1 text-[11px] text-cyan-400"
-                    >
-                      {title}
-                    </span>
-                  ))}
-                </div>
-              </div>
+            {/* Runbook Sources & Graph Correlation Panel */}
+            {hasSources && (
+              <SourcesPanel
+                sourceChunks={message.sourceChunks}
+                expandedViaGraph={message.expandedViaGraph}
+                graphEdgesUsed={message.graphEdgesUsed}
+              />
             )}
           </div>
         )}
@@ -149,4 +113,3 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     </div>
   );
 }
-

@@ -1,5 +1,5 @@
 import { useLocation } from "react-router-dom";
-import { Search, Bell, Wifi } from "lucide-react";
+import { Search, Bell } from "lucide-react";
 import type { RouteConfig } from "@/types";
 
 const ROUTES: RouteConfig[] = [
@@ -41,23 +41,7 @@ export default function Header() {
       </div>
 
       {/* ── Right Actions ──────────────────────── */}
-      <div className="flex items-center gap-3">
-        {/* AI Model Badge */}
-        <div className="hidden items-center gap-1.5 rounded-md border border-edge bg-elevated px-2.5 py-1 md:flex">
-          <span className="h-1.5 w-1.5 rounded-full bg-success" />
-          <span className="text-[11px] font-medium text-zinc-400">
-            Claude 3.5 Sonnet
-          </span>
-        </div>
-
-        {/* Connection Status */}
-        <div className="flex items-center gap-1.5 rounded-md border border-edge bg-elevated px-2 py-1">
-          <Wifi className="h-3 w-3 text-success" />
-          <span className="hidden text-[11px] font-medium text-zinc-500 lg:inline">
-            Connected
-          </span>
-        </div>
-
+      <div className="flex items-center gap-2">
         {/* Notifications */}
         <button
           className="relative rounded-lg p-2 text-zinc-500 transition-colors hover:bg-elevated hover:text-zinc-300"

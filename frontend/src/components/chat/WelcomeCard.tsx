@@ -1,22 +1,22 @@
-import { Zap, Container, Timer, Globe, Database } from "lucide-react";
+import { Zap, Container, Server, Layers, HelpCircle } from "lucide-react";
 import SuggestedPrompt from "@/components/chat/SuggestedPrompt";
 
 const SUGGESTIONS = [
   {
     icon: Container,
-    title: "Investigate a Kubernetes CrashLoopBackOff",
+    title: "My pod is in CrashLoopBackOff.",
   },
   {
-    icon: Timer,
-    title: "Analyze a Redis timeout",
+    icon: Server,
+    title: "The Kubernetes API server is returning 5xx errors.",
   },
   {
-    icon: Globe,
-    title: "Find the root cause of HTTP 502 errors",
+    icon: Layers,
+    title: "Pods are not getting scheduled due to capacity limits.",
   },
   {
-    icon: Database,
-    title: "Explain database connection failures",
+    icon: HelpCircle,
+    title: "Analyze a Redis timeout.",
   },
 ] as const;
 
@@ -26,35 +26,35 @@ interface WelcomeCardProps {
 
 export default function WelcomeCard({ onSelectPrompt }: WelcomeCardProps) {
   return (
-    <div className="mx-auto flex max-w-2xl flex-col items-center px-4 py-12">
+    <div className="mx-auto flex max-w-2xl flex-col items-center px-4 py-10">
       {/* Logo */}
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-edge bg-surface">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-edge bg-surface shadow-sm">
         <Zap className="h-7 w-7 text-accent" />
       </div>
 
       {/* Heading */}
-      <h2 className="mt-5 text-xl font-semibold text-zinc-100">
-        How can I help you investigate?
+      <h2 className="mt-4 text-xl font-bold tracking-tight text-zinc-100">
+        OpsPilot Incident Investigation
       </h2>
-      <p className="mt-2 max-w-md text-center text-[13px] leading-relaxed text-zinc-500">
-        Describe your infrastructure issue or paste error logs. I'll retrieve relevant
-        runbooks and provide a structured incident analysis.
+      <p className="mt-1.5 max-w-md text-center text-[13px] leading-relaxed text-zinc-400">
+        AI Site Reliability Assistant grounded in Kubernetes operational runbooks and one-hop cluster dependency graphs.
       </p>
 
-      {/* Retrieval badges */}
-      <div className="mt-5 flex items-center gap-2">
-        {["ChromaDB", "BM25", "GraphRAG"].map((method) => (
-          <span
-            key={method}
-            className="rounded-md border border-edge bg-elevated px-2 py-0.5 text-[10px] font-medium text-zinc-500"
-          >
-            {method}
-          </span>
-        ))}
+      {/* RAG pipeline badges */}
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+        <span className="rounded-md border border-edge bg-elevated px-2.5 py-1 text-[11px] font-medium text-zinc-400">
+          ChromaDB (Vector Search)
+        </span>
+        <span className="rounded-md border border-edge bg-elevated px-2.5 py-1 text-[11px] font-medium text-zinc-400">
+          NetworkX (Knowledge Graph)
+        </span>
+        <span className="rounded-md border border-edge bg-elevated px-2.5 py-1 text-[11px] font-medium text-zinc-400">
+          Groq / Qwen (Evidence Grounded)
+        </span>
       </div>
 
       {/* Suggestion Grid */}
-      <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="mt-7 grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2">
         {SUGGESTIONS.map((s) => (
           <SuggestedPrompt
             key={s.title}

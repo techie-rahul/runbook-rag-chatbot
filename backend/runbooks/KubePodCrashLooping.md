@@ -15,7 +15,7 @@ weight: 20
 
 ## Meaning
 
-Pod is in CrashLoop which means the app dies or is unresponsive and 
+Pod is in CrashLoop which means the app dies or is unresponsive and
 kubernetes tries to restart it automatically.
 
 ## Impact
